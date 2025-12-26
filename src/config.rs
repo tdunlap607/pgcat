@@ -1211,7 +1211,7 @@ impl From<&Config> for std::collections::HashMap<String, String> {
         ];
 
         r.append(&mut static_settings);
-        return r.iter().cloned().collect();
+        r.iter().cloned().collect()
     }
 }
 
@@ -1283,12 +1283,11 @@ impl Config {
                     .values()
                     .map(|user_cfg| user_cfg.pool_size)
                     .sum::<u32>()
-                    .to_string()
             );
             info!(
                 "[pool: {}] Default pool mode: {}",
                 pool_name,
-                pool_config.pool_mode.to_string()
+                pool_config.pool_mode
             );
             info!(
                 "[pool: {}] Load Balancing mode: {:?}",
@@ -1321,7 +1320,7 @@ impl Config {
             info!(
                 "[pool: {}] Sharding function: {}",
                 pool_name,
-                pool_config.sharding_function.to_string()
+                pool_config.sharding_function
             );
             info!(
                 "[pool: {}] Primary reads: {}",
@@ -1552,7 +1551,7 @@ pub async fn parse(path: &str) -> Result<(), Error> {
     let mut file = match File::open(path).await {
         Ok(file) => file,
         Err(err) => {
-            error!("Could not open '{}': {}", path, err.to_string());
+            error!("Could not open '{}': {}", path, err);
             return Err(Error::BadConfig);
         }
     };
@@ -1560,7 +1559,7 @@ pub async fn parse(path: &str) -> Result<(), Error> {
     match file.read_to_string(&mut contents).await {
         Ok(_) => (),
         Err(err) => {
-            error!("Could not read config file: {}", err.to_string());
+            error!("Could not read config file: {}", err);
             return Err(Error::BadConfig);
         }
     };
@@ -1568,7 +1567,7 @@ pub async fn parse(path: &str) -> Result<(), Error> {
     let mut config: Config = match toml::from_str(&contents) {
         Ok(config) => config,
         Err(err) => {
-            error!("Could not parse config file: {}", err.to_string());
+            error!("Could not parse config file: {}", err);
             return Err(Error::BadConfig);
         }
     };

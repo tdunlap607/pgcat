@@ -40,7 +40,7 @@ pub enum StreamInner {
     },
     Tls {
         #[pin]
-        stream: TlsStream<TcpStream>,
+        stream: Box<TlsStream<TcpStream>>,
     },
 }
 
@@ -424,7 +424,7 @@ impl Server {
                         }
                     };
 
-                    StreamInner::Tls { stream }
+                    StreamInner::Tls { stream: Box::new(stream) }
                 }
 
                 // Server does not support TLS
@@ -1424,8 +1424,9 @@ async fn parse_query_message(message: &mut BytesMut) -> Result<Vec<String>, Erro
                 "Protocol error parsing response. Err: {:?}",
                 err.fields()
                     .iterator()
-                    .fold(String::default(), |acc, element| acc
-                        + element.unwrap().value())
+                    .fold(String::default(), |acc, element| {
+                        acc + std::str::from_utf8(element.unwrap().value_bytes()).unwrap_or("")
+                    })
             )))
         }
         Ok(_) => {

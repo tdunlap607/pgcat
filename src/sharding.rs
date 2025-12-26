@@ -79,7 +79,7 @@ impl Sharder {
 
     #[inline]
     fn rot(x: u32, k: u32) -> u32 {
-        (x << k) | (x >> (32 - k))
+        x.rotate_left(k)
     }
 
     #[inline]
