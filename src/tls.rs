@@ -23,8 +23,9 @@ pub fn load_certs(path: &Path) -> std::io::Result<Vec<CertificateDer<'static>>> 
 
 pub fn load_key(path: &Path) -> std::io::Result<PrivateKeyDer<'static>> {
     let mut reader = std::io::BufReader::new(std::fs::File::open(path)?);
-    private_key(&mut reader)?
-        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidInput, "no private key found"))
+    private_key(&mut reader)?.ok_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::InvalidInput, "no private key found")
+    })
 }
 
 pub struct Tls {

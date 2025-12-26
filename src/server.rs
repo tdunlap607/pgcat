@@ -400,9 +400,7 @@ impl Server {
                     debug!("Connecting to server using TLS");
 
                     let mut root_store = RootCertStore::empty();
-                    root_store.extend(
-                        webpki_roots::TLS_SERVER_ROOTS.iter().cloned()
-                    );
+                    root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
 
                     let mut tls_config = rustls::ClientConfig::builder()
                         .with_root_certificates(root_store)
@@ -411,20 +409,15 @@ impl Server {
                     // Equivalent to sslmode=prefer which is fine most places.
                     // If you want verify-full, change `verify_server_certificate` to true.
                     if !config.general.verify_server_certificate {
-                        tls_config
-                            .dangerous()
-                            .set_certificate_verifier(Arc::new(
-                                crate::tls::NoCertificateVerification {},
-                            ));
+                        tls_config.dangerous().set_certificate_verifier(Arc::new(
+                            crate::tls::NoCertificateVerification {},
+                        ));
                     }
 
                     let connector = TlsConnector::from(Arc::new(tls_config));
                     let server_name = rustls_pki_types::ServerName::try_from(address.host.clone())
                         .map_err(|_| Error::SocketError("Invalid server name".to_string()))?;
-                    let stream = match connector
-                        .connect(server_name, stream)
-                        .await
-                    {
+                    let stream = match connector.connect(server_name, stream).await {
                         Ok(stream) => stream,
                         Err(err) => {
                             return Err(Error::SocketError(format!("Server TLS error: {:?}", err)))
