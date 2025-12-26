@@ -12,114 +12,48 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    container:
-      image: ghcr.io/postgresml/pgcat-ci:latest
-      env:
-        RUST_LOG: info
-
-    services:
-      postgres-5432:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_INITDB_ARGS: --auth-local=md5 --auth-host=md5 --auth=md5
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -p 5432:5432
-
-      postgres-7432:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256 --auth=scram-sha-256
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -p 7432:5432
-
-      postgres-8432:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256 --auth=scram-sha-256
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -p 8432:5432
-
-      postgres-9432:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256 --auth=scram-sha-256
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -p 9432:5432
-
-      postgres-10432:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_INITDB_ARGS: --auth-local=md5 --auth-host=md5 --auth=md5
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -p 10432:5432
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Rust toolchain
-        run: rustup default stable
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: cargo-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            cargo-
+      - name: Start services
+        run: docker compose -f .github/docker-compose.ci.yml up -d --wait
 
       - name: Lint (rustfmt)
-        run: cargo fmt --check
+        run: |
+          docker compose -f .github/docker-compose.ci.yml exec -T ci bash -c "
+            rustup default stable &&
+            cargo fmt --check
+          "
 
       - name: Lint (clippy)
-        run: cargo clippy --all --all-targets
+        run: |
+          docker compose -f .github/docker-compose.ci.yml exec -T ci bash -c "
+            cargo clippy --all --all-targets
+          "
 
       - name: Build
-        run: cargo build
+        run: |
+          docker compose -f .github/docker-compose.ci.yml exec -T ci bash -c "
+            cargo build
+          "
 
       - name: Unit tests
-        run: cargo test
+        run: |
+          docker compose -f .github/docker-compose.ci.yml exec -T ci bash -c "
+            cargo test
+          "
 
       - name: Integration tests
-        run: bash .circleci/run_tests.sh
+        run: |
+          docker compose -f .github/docker-compose.ci.yml exec -T ci bash -c "
+            chmod +x .github/run_tests.sh &&
+            bash .github/run_tests.sh
+          "
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f .github/docker-compose.ci.yml down -v
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

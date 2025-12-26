@@ -1,0 +1,89 @@
+#
+# PgCat config for GitHub Actions CI
+#
+
+#
+# General pooler settings
+[general]
+host = "0.0.0.0"
+port = 6432
+enable_prometheus_exporter = true
+prometheus_exporter_port = 9930
+connect_timeout = 1000
+healthcheck_timeout = 1000
+healthcheck_delay = 30000
+shutdown_timeout = 5000
+ban_time = 60
+log_client_connections = false
+log_client_disconnections = false
+autoreload = 15000
+tls_certificate = ".github/server.cert"
+tls_private_key = ".github/server.key"
+admin_username = "admin_user"
+admin_password = "admin_pass"
+
+[pools.sharded_db]
+pool_mode = "transaction"
+prepared_statements_cache_size = 500
+default_role = "any"
+query_parser_enabled = true
+query_parser_read_write_splitting = true
+primary_reads_enabled = true
+sharding_function = "pg_bigint_hash"
+
+[pools.sharded_db.users.0]
+username = "sharding_user"
+password = "sharding_user"
+pool_size = 9
+statement_timeout = 0
+
+[pools.sharded_db.users.1]
+username = "other_user"
+password = "other_user"
+pool_size = 21
+statement_timeout = 30000
+
+# Shard 0
+[pools.sharded_db.shards.0]
+servers = [
+    [ "postgres-primary", 5432, "primary" ],
+    [ "postgres-primary", 5432, "replica" ]
+]
+database = "shard0"
+
+[pools.sharded_db.shards.1]
+servers = [
+    [ "postgres-primary", 5432, "primary" ],
+    [ "postgres-primary", 5432, "replica" ],
+]
+database = "shard1"
+
+[pools.sharded_db.shards.2]
+servers = [
+    [ "postgres-primary", 5432, "primary" ],
+    [ "postgres-primary", 5432, "replica" ],
+]
+database = "shard2"
+
+
+[pools.simple_db]
+pool_mode = "session"
+default_role = "primary"
+query_parser_enabled = true
+query_parser_read_write_splitting = true
+primary_reads_enabled = true
+sharding_function = "pg_bigint_hash"
+prepared_statements_cache_size = 500
+
+[pools.simple_db.users.0]
+username = "simple_user"
+password = "simple_user"
+pool_size = 5
+statement_timeout = 30000
+
+[pools.simple_db.shards.0]
+servers = [
+    [ "postgres-primary", 5432, "primary" ],
+    [ "postgres-primary", 5432, "replica" ]
+]
+database = "some_db"
