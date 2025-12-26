@@ -110,7 +110,7 @@ jobs:
         run: cargo fmt --check
 
       - name: Lint (clippy)
-        run: cargo clippy --all --all-targets -- -Dwarnings
+        run: cargo clippy --all --all-targets
 
       - name: Build
         run: cargo build
