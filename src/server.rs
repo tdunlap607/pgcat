@@ -424,7 +424,9 @@ impl Server {
                         }
                     };
 
-                    StreamInner::Tls { stream: Box::new(stream) }
+                    StreamInner::Tls {
+                        stream: Box::new(stream),
+                    }
                 }
 
                 // Server does not support TLS

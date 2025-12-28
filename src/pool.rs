@@ -994,7 +994,10 @@ impl ConnectionPool {
                     BanReason::AdminBan(duration) => {
                         now.and_utc().timestamp() - timestamp.and_utc().timestamp() > *duration
                     }
-                    _ => now.and_utc().timestamp() - timestamp.and_utc().timestamp() > self.settings.ban_time,
+                    _ => {
+                        now.and_utc().timestamp() - timestamp.and_utc().timestamp()
+                            > self.settings.ban_time
+                    }
                 }
             }
             None => return true,
