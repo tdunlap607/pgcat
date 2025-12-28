@@ -1,6 +1,9 @@
 use crate::config::get_config;
 use crate::errors::Error;
 use arc_swap::ArcSwap;
+use hickory_resolver::error::{ResolveError, ResolveResult};
+use hickory_resolver::lookup_ip::LookupIp;
+use hickory_resolver::TokioAsyncResolver;
 use log::{debug, error, info, warn};
 use once_cell::sync::Lazy;
 use std::collections::{HashMap, HashSet};
@@ -9,9 +12,6 @@ use std::net::IpAddr;
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::time::{sleep, Duration};
-use hickory_resolver::error::{ResolveError, ResolveResult};
-use hickory_resolver::lookup_ip::LookupIp;
-use hickory_resolver::TokioAsyncResolver;
 
 /// Cached Resolver Globally available
 pub static CACHED_RESOLVER: Lazy<ArcSwap<CachedResolver>> =
