@@ -1287,8 +1287,7 @@ impl Config {
             );
             info!(
                 "[pool: {}] Default pool mode: {}",
-                pool_name,
-                pool_config.pool_mode.to_string()
+                pool_name, pool_config.pool_mode
             );
             info!(
                 "[pool: {}] Load Balancing mode: {:?}",
@@ -1320,8 +1319,7 @@ impl Config {
             };
             info!(
                 "[pool: {}] Sharding function: {}",
-                pool_name,
-                pool_config.sharding_function.to_string()
+                pool_name, pool_config.sharding_function
             );
             info!(
                 "[pool: {}] Primary reads: {}",
