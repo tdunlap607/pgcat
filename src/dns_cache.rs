@@ -9,9 +9,9 @@ use std::net::IpAddr;
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::time::{sleep, Duration};
-use trust_dns_resolver::error::{ResolveError, ResolveResult};
-use trust_dns_resolver::lookup_ip::LookupIp;
-use trust_dns_resolver::TokioAsyncResolver;
+use hickory_resolver::error::{ResolveError, ResolveResult};
+use hickory_resolver::lookup_ip::LookupIp;
+use hickory_resolver::TokioAsyncResolver;
 
 /// Cached Resolver Globally available
 pub static CACHED_RESOLVER: Lazy<ArcSwap<CachedResolver>> =
@@ -326,7 +326,7 @@ impl CachedResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use trust_dns_resolver::error::ResolveError;
+    use hickory_resolver::error::ResolveError;
 
     #[tokio::test]
     async fn new() {
